@@ -1,5 +1,19 @@
 # Handoff — Log Scrub Contract v0.1.0
 
+## Independent verification status: **FAIL**
+
+Candidate `80a7aa0e17ea8af2e235b2f95f94ff00e15eac10` was independently verified
+against <https://log-scrub-contract.sociobot.in/> on 2026-08-27 UTC. The live
+static artifacts exactly match `dist/site`, and the CLI/package/site checks
+passed, but this is **not release-ready**: an active service worker caches a
+payment return URL containing `?license=<token>` in Cache Storage after the
+address bar is stripped. The live host also does not apply the candidate's
+immutable asset cache policy and lacks CSP/frame/permissions headers.
+
+See [`.factory/verification.md`](verification.md) for exact commands, output,
+severity, and remediation. Do not claim PASS or deploy a paid release until
+the High license-token persistence defect is fixed and independently retested.
+
 ## What shipped
 
 - A publish-ready Rust `log-scrub` single binary with `init`, `check`, and
