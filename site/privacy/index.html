@@ -20,7 +20,7 @@
       <h2>CLI and browser demo</h2>
       <p>The CLI has no telemetry or network code. It reads the policy and fixtures you select, performs redaction and checks locally, and writes only the output or report you request. The browser demo processes its textarea in memory in your browser. We do not receive, store, or inspect those contents.</p>
       <h2>Local device storage</h2>
-      <p>If you buy or restore the optional Team Pack, the site stores the license token and a time-stamped verification result in your browser's local storage. This keeps the unlock available between visits and avoids verification more than once per day. Clearing site data removes both. No fixture or policy is stored there.</p>
+      <p>If you buy or restore the optional Team Pack, the site stores the license token and a time-stamped verification result in your browser's local storage. The checkout token is removed from the address bar immediately and is never written to Cache Storage. This keeps the unlock available between visits and avoids verification more than once per day. Clearing site data removes both. No fixture or policy is stored there.</p>
       <h2>License verification and purchase</h2>
       <p>Buying opens the Sociobot billing service, with Dodo as merchant of record. License verification sends the license token to <code>api.sociobot.in</code>; it does not send logs, policies, editor contents, or CLI usage. The merchant processes purchase details under its own checkout privacy terms.</p>
       <h2>Site delivery</h2>

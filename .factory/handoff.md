@@ -1,101 +1,62 @@
-# Handoff — Log Scrub Contract v0.1.0
+# Handoff — Log Scrub Contract v0.1.0 repair
 
-## Independent verification status: **FAIL**
+## Release status: ready for Standard static docs deployment
 
-Candidate `80a7aa0e17ea8af2e235b2f95f94ff00e15eac10` was independently verified
-against <https://log-scrub-contract.sociobot.in/> on 2026-08-27 UTC. The live
-static artifacts exactly match `dist/site`, and the CLI/package/site checks
-passed, but this is **not release-ready**: an active service worker caches a
-payment return URL containing `?license=<token>` in Cache Storage after the
-address bar is stripped. The live host also does not apply the candidate's
-immutable asset cache policy and lacks CSP/frame/permissions headers.
+This repair resolves the independent report at `f5338e4251d7e7b354702717356863987703eac0` for candidate `80a7aa0e17ea8af2e235b2f95f94ff00e15eac10`.
 
-See [`.factory/verification.md`](verification.md) for exact commands, output,
-severity, and remediation. Do not claim PASS or deploy a paid release until
-the High license-token persistence defect is fixed and independently retested.
+## What changed
 
-## What shipped
+- Replaced the cache-every-GET worker with `log-scrub-contract-v2`. It only precaches fixed, token-free shell URLs and only runtime-caches content-hashed `/assets/*.js` and `/assets/*.css` responses.
+- Navigation requests are network-only (with the known-safe root shell as the offline fallback). URLs with `license`, `license_token`, or `entitlement` query keys, and product verification/entitlement paths, are never cached.
+- On activation the worker removes every old cache version and scans the active cache for any matching sensitive key, so previously persisted checkout URLs are removed during the upgrade.
+- The checkout return code deletes `license` from the address bar before any storage operation, preserves unrelated query/hash state, and has a same-origin `location.replace` fallback if `history.replaceState` is unavailable. License storage failure is handled quietly rather than leaving the token in the URL or throwing.
+- Kept the registered production Sociobot/Dodo Live checkout and verify URLs: `https://api.sociobot.in/api/v1/products/log-scrub-contract/checkout` and `.../verify?license=...`. A live GET to the checkout endpoint returned HTTP `303` to `checkout.dodopayments.com` on 2026-08-27 UTC.
+- Added static-docs `_headers`: no-cache for documents and `sw.js`, one-year immutable caching for content-hashed JS/CSS, restrictive CSP with the Sociobot API in `connect-src`, `frame-ancestors 'none'`, `X-Frame-Options: DENY`, and a deny-by-default Permissions Policy.
+- Updated privacy and README copy to make the address-bar and Cache Storage boundary explicit.
 
-- A publish-ready Rust `log-scrub` single binary with `init`, `check`, and
-  `redact` commands; documented exit codes; human/JSON output; and a safe
-  Markdown report.
-- JSON, JSONL, and text fixtures; recursive directory discovery; dotted path
-  and wildcard rules; Rust linear-time regex rules; environment/CLI runtime
-  token rules; deny-regex assertions; entropy checks; 10 MiB input limits; and
-  validation for empty fixtures and unsafe policies.
-- Failed checks never serialize or print a payload that still contains a
-  possible leak. The payload is withheld while value-free evidence remains
-  available to CI.
-- A responsive handwritten-lab-notebook landing site with a local interactive
-  fail/pass/error demo, install/CI guidance, offline shell, privacy/terms pages,
-  and an optional $29 Team Pack license flow through Sociobot.
-- License return capture, local storage under
-  `sb_license:log-scrub-contract`, cached daily verification, optimistic cached
-  unlock, offline reconciliation, restore form, and quiet invalid-license UI.
-  The complete safety CLI remains free.
-- An original `factory-image` hero, saved as 75 KB desktop and 26 KB mobile
-  WebP files. The verbatim prompt and generation settings are in
-  `site/public/assets/hero-lab.provenance.json`.
+## Verification performed
 
-## Run and deploy
+From a clean dependency install:
+
+```sh
+npm ci
+npm test
+cargo clippy --locked --all-targets -- -D warnings
+npm run build
+```
+
+- `npm test` passed: 13 Rust unit tests, 1 doctest, and 3 Vitest tests.
+- Clippy passed with `-D warnings`.
+- `npm run build` created `dist/site` and `dist/bin/log-scrub`. The generated initial JavaScript is 7,943 bytes and CSS is 12,952 bytes.
+- Browser/PWA regression passed against a local Vite server:
+
+  ```sh
+  npm run dev -- --host 127.0.0.1
+  npm run test:e2e -- http://127.0.0.1:5173/
+  ```
+
+  It seeds the old v1 Cache Storage with a license URL and a body containing a synthetic token, reinstalls the worker, performs a Dodo Live verify-route return, requests a token-bearing entitlement response, then enumerates every Cache Storage request key and response byte sequence. No token bytes remain. It also covers mobile keyboard FAIL/PASS/ERROR states and offline status.
+- Axe passed at mobile size with 0 violation types and 0 serious/critical findings:
+
+  ```sh
+  mkdir -p .factory/evidence
+  node scripts/a11y.mjs http://127.0.0.1:5173/ .factory/evidence/axe-repair.json
+  ```
+
+- Release CLI smoke passed: `init` and `check` pass a starter fixture; a synthetic residual secret makes `redact --json` exit 1 and neither stdout nor stderr contains the synthetic email or token bytes. This preserves the output-withholding redaction contract.
+
+## Run, package, and deploy
 
 ```sh
 npm ci
 npm test
 npm run build
-```
-
-`npm run build` is the work-order build command. It creates the deployable site
-at `dist/site/index.html` and the host-platform CLI at `dist/bin/log-scrub`.
-Deploy `dist/site` at `https://log-scrub-contract.sociobot.in`.
-
-For CLI development and packaging:
-
-```sh
-cargo test --locked
-cargo clippy --locked --all-targets -- -D warnings
 cargo package --locked
 ```
 
-The verified crate is `target/package/log-scrub-contract-0.1.0.crate` (17.2 KB
-compressed). The factory owns registry credentials; this worker did not
-publish it.
+Deploy `dist/site` as Standard static docs at `https://log-scrub-contract.sociobot.in`. The factory owns publishing and registry credentials; do not publish the crate from this checkout.
 
-## Verification performed
+## Known limits
 
-- Clean-source verification: exported `git archive HEAD` to a fresh directory,
-  ran `npm ci`, `npm test`, and `npm run build`; both `dist/site/index.html` and
-  `dist/bin/log-scrub` were present.
-- Tests: 13 Rust unit tests, 1 Rust doctest, and 3 Vitest tests pass.
-- Clippy: all targets pass with warnings denied.
-- CLI smoke: starter init/check passes; JSONL round trip passes; a synthetic
-  high-entropy leak exits 1 from both `redact` and `check --json`, with zero raw
-  payload bytes in stdout, stderr, or the JSON report.
-- Browser E2E at 390×844: keyboard run, initial FAIL, configured PASS, malformed
-  JSON ERROR, paid return/license storage, and offline banner all pass with no
-  console errors.
-- `verify-url.sh`: HTTP 200; title/lang/main present; one h1; all images have
-  alt text; all buttons labelled; no console errors.
-- Axe 4.10.2: 0 violation types on `/`, `/privacy/`, and `/terms/` (desktop and
-  mobile checks used during development).
-- Lighthouse mobile against the production build: Performance 100,
-  Accessibility 100, Best Practices 100, SEO 100; FCP 0.9 s, LCP 0.9 s,
-  TBT 0 ms, CLS 0.
-- Initial production assets: JavaScript 7.83 KB, CSS 12.95 KB, hero 75 KB
-  desktop / 26 KB mobile. No CDN fonts, runtime scripts, analytics, or
-  telemetry.
-
-Local ignored evidence is under `.factory/evidence/final/`.
-
-## Known gaps and next steps
-
-- The factory still needs to register the `log-scrub-contract` paid product and
-  configure its return URL. The site intentionally uses the production
-  Sociobot endpoint and contains no provider product ID.
-- Team Pack entitlement is a client-side convenience gate in this static v1,
-  not DRM. Do not place confidential material in future client-delivered packs.
-- The browser demo is intentionally a reduced specimen with fixed safe shapes;
-  the Rust CLI is the authoritative engine for configurable safe regex,
-  runtime tokens, JSONL, reports, and CI.
-- The copied binary is built for the worker's Linux host. Release automation
-  should produce signed binaries for each supported platform.
+- Team Pack remains a client-side convenience unlock, not DRM. Do not place confidential material in a future client-delivered pack.
+- The copied CLI binary is built for this Linux worker; release automation should create signed binaries for all supported platforms.

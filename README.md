@@ -117,7 +117,12 @@ npm run dev            # local documentation site
 ```
 
 The static site is Vite + TypeScript and includes an offline, in-browser demo.
-Its payload never leaves the tab. Production deployment serves `dist/site`.
+Its payload never leaves the tab. The optional Team Pack uses the registered
+Dodo Live checkout at Sociobot; a returned `license` parameter is removed from
+the address bar before use and service-worker caches never store token-bearing
+URLs or entitlement responses. Production deployment serves `dist/site` as
+standard static docs, including the `_headers` cache and browser-security
+policy.
 
 ## Project scope
 

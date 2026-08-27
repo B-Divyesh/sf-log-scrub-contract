@@ -6,6 +6,17 @@ const LICENSE_KEY = `sb_license:${SLUG}`;
 const VERDICT_KEY = `sb_license_verdict:${SLUG}`;
 const DAY = 86_400_000;
 
+function readLocal(key: string): string | null {
+  try { return localStorage.getItem(key); } catch { return null; }
+}
+
+function writeLocal(key: string, value: string): boolean {
+  try {
+    localStorage.setItem(key, value);
+    return true;
+  } catch { return false; }
+}
+
 function byId<T extends HTMLElement>(id: string): T {
   const element = document.getElementById(id);
   if (!element) throw new Error(`Missing #${id}`);
@@ -87,7 +98,7 @@ interface CachedVerdict { token: string; valid: boolean; checkedAt: number }
 
 function readVerdict(): CachedVerdict | null {
   try {
-    const value = JSON.parse(localStorage.getItem(VERDICT_KEY) ?? "null") as CachedVerdict | null;
+    const value = JSON.parse(readLocal(VERDICT_KEY) ?? "null") as CachedVerdict | null;
     return value && typeof value.token === "string" && typeof value.valid === "boolean" ? value : null;
   } catch { return null; }
 }
@@ -113,7 +124,7 @@ async function verifyLicense(token: string): Promise<void> {
     if (!response.ok) throw new Error("verification service unavailable");
     const verdict = await response.json() as { valid: boolean };
     const value = { token, valid: Boolean(verdict.valid), checkedAt: Date.now() };
-    localStorage.setItem(VERDICT_KEY, JSON.stringify(value));
+    writeLocal(VERDICT_KEY, JSON.stringify(value));
     setUnlocked(value.valid, value.valid ? "Team Pack license active." : "License no longer active. You can purchase or restore another license.");
   } catch {
     setUnlocked(cached?.token === token && cached.valid, cached?.valid ? "Using the last verified license while the service is unavailable." : "Could not verify just now. The free CLI and demo remain available.");
@@ -121,13 +132,21 @@ async function verifyLicense(token: string): Promise<void> {
 }
 
 const query = new URLSearchParams(location.search);
+const hasReturnedLicense = query.has("license");
 const returnedLicense = query.get("license");
-if (returnedLicense) {
-  localStorage.setItem(LICENSE_KEY, returnedLicense);
+if (hasReturnedLicense) {
   query.delete("license");
-  history.replaceState(null, "", `${location.pathname}${query.size ? `?${query}` : ""}${location.hash}`);
+  const cleanAddress = `${location.pathname}${query.size ? `?${query}` : ""}${location.hash}`;
+  try {
+    history.replaceState(null, "", cleanAddress);
+  } catch {
+    // This is same-origin and removes the token even in a restricted history
+    // context. The replacement has no back-button entry containing the token.
+    location.replace(cleanAddress);
+  }
 }
-const storedLicense = returnedLicense ?? localStorage.getItem(LICENSE_KEY);
+if (returnedLicense) writeLocal(LICENSE_KEY, returnedLicense);
+const storedLicense = returnedLicense ?? readLocal(LICENSE_KEY);
 if (storedLicense) {
   const cached = readVerdict();
   if (cached?.token === storedLicense && cached.valid) setUnlocked(true, "Team Pack license active.");
@@ -138,7 +157,7 @@ byId<HTMLFormElement>("license-form").addEventListener("submit", (event) => {
   event.preventDefault();
   const token = byId<HTMLInputElement>("license-token").value.trim();
   if (!token) return;
-  localStorage.setItem(LICENSE_KEY, token);
+  writeLocal(LICENSE_KEY, token);
   void verifyLicense(token);
 });
 
