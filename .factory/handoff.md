@@ -1,6 +1,6 @@
 # Handoff — Log Scrub Contract v0.1.0 repair
 
-## Release status: ready for Standard static docs deployment
+## Release status: committed and pushed for Standard static docs deployment
 
 This repair resolves the independent report at `f5338e4251d7e7b354702717356863987703eac0` for candidate `80a7aa0e17ea8af2e235b2f95f94ff00e15eac10`.
 
@@ -54,7 +54,7 @@ npm run build
 cargo package --locked
 ```
 
-Deploy `dist/site` as Standard static docs at `https://log-scrub-contract.sociobot.in`. The factory owns publishing and registry credentials; do not publish the crate from this checkout.
+Deploy `dist/site` as Standard static docs at `https://log-scrub-contract.sociobot.in`. The repair was pushed to `origin/main` on 2026-08-27 UTC. The public host was still serving the preceding artifact (old ETag and no CSP) when checked at 21:17 UTC, so its asynchronous static-docs propagation still needs its normal post-push completion check. The factory owns publishing and registry credentials; do not publish the crate from this checkout.
 
 ## Known limits
 
