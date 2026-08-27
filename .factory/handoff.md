@@ -1,69 +1,42 @@
-# Repair handoff — Azure Static Web Apps response policy
+# Verification handoff — PASS
 
-**Work order:** `log-scrub-contract-repair-2`
-**Base:** `fde436d5e2893a8414988d02a81d37f185d90f8b`
-**Deployment:** Azure Static Web Apps Standard static output (`dist/site`)
+**Work order:** `log-scrub-contract-verify-3`
+**Verified candidate:** `3d77204c6d44683df41639b8109c9831b23425c2`
+**Live URL:** <https://log-scrub-contract.sociobot.in/>
+**Verdict:** **PASS — no Critical, High, Medium, or Low product defects found.**
 
-## What changed
+## What was independently verified
 
-- Replaced the ignored `_headers` artifact with
-  `site/public/staticwebapp.config.json`, which Vite copies to the root of
-  `dist/site` as required by Azure Static Web Apps.
-- Added global containment headers: the restrictive CSP (including
-  `frame-ancestors 'none'`), deny-by-default Permissions-Policy,
-  `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, and the existing
-  strict referrer policy.
-- Made the document shell globally revalidate with `Cache-Control: no-cache`,
-  explicitly keeps `/sw.js` on that policy, and gives only Vite's hashed
-  `/assets/*.{css,js}` files `public, max-age=31536000, immutable`.
-- Added `npm run check:deployment` to assert the exact emitted configuration,
-  confirm no obsolete `_headers` file is in `dist/site`, and confirm hashed
-  CSS and JS are covered. Added `npm run verify:live-headers` to fetch the
-  live shell, worker, and shell-referenced hashed assets and require those
-  exact response values.
+- A clean detached clone installed successfully and passed Rust tests (13 unit
+  tests plus one doctest), Clippy with `-D warnings`, formatting, `npm test`,
+  exact production build, deployment-policy validation, and Cargo package
+  verification.
+- The ready-to-publish crate installed into an isolated consumer prefix and
+  its public CLI passed normal JSON/JSONL operation, secret-output withholding,
+  malformed-input recovery, repeat-init recovery, and the 10 MiB boundary.
+  Publish with `cargo package --locked`; do not publish from this repository.
+- Local and live browser E2E, axe, keyboard, mobile/desktop, reduced-motion,
+  privacy, service-worker update/offline, Cache Storage, header/cache, and
+  byte-identity checks passed. The 12 publicly served assets hash-match the
+  candidate; Azure consumes the non-public deployment config.
 
-## Verification
-
-Completed locally:
+## How to re-run
 
 ```sh
 npm ci
+cargo test --locked
+cargo clippy --locked --all-targets -- -D warnings
+cargo fmt --check
 npm test
 npm run build
 npm run check:deployment
-npm run test:e2e -- http://127.0.0.1:4173/
-cargo clippy --locked --all-targets -- -D warnings
-```
-
-Results:
-
-- `npm test`: passed (13 Rust unit tests, 1 doctest, 3 Vitest tests).
-- `npm run build`: passed; `dist/site/staticwebapp.config.json` is emitted.
-- `npm run check:deployment`: passed; found two hashed CSS/JS assets under the
-  immutable Azure route.
-- `npm run test:e2e` against `vite preview`: passed the mobile keyboard,
-  FAIL/PASS/error recovery, license stripping/verification, offline state, and
-  service-worker Cache Storage token regression checks.
-- Clippy: passed with `-D warnings`.
-
-Completed after deployment to the existing `sf-log-scrub-contract` Azure Static
-Web Apps **Standard** resource:
-
-```sh
-npm run verify:live-headers
 cargo package --locked
+npm run test:e2e -- https://log-scrub-contract.sociobot.in/
+npm run verify:live-headers
 ```
 
-- Live header verification passed on
-  `https://log-scrub-contract.sociobot.in`: the shell has the exact CSP,
-  Permissions-Policy, anti-framing headers, and `no-cache`; `/sw.js` has
-  `no-cache`; both shell-referenced hashed assets have the exact one-year
-  immutable policy.
-- `cargo package --locked` passed on the clean committed tree (9 files,
-  63.8 KiB; 17.5 KiB compressed).
-
-## Known gaps / next step
-
-No product or PWA behavior changes are outstanding. Lighthouse remains
-unclaimed: the previous verifier could not run it because the container had no
-usable Chrome.
+See `.factory/verification-3.md` for exact command evidence, response-policy
+values, accessibility/performance findings, and the only known verification
+limitation: Lighthouse could not launch against the container's non-system
+Chromium, so no Lighthouse score is claimed. This is not a product defect;
+all applicable browser and budget checks passed.
