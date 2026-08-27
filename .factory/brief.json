@@ -1,0 +1,10 @@
+{
+  "slug": "log-scrub-contract",
+  "title": "Log Scrub Contract",
+  "territory": "devtools-data",
+  "user": "Security-conscious developers forwarding structured logs who need regression-tested proof that configured secrets and personal data are removed before a drain or support bundle leaves their environment.",
+  "smallest_useful_product": "A local CLI with JSON/text fixture tests, path/regex/token rules, entropy checks, and a redacted before/after report that can gate CI.",
+  "artifact_class": "cli",
+  "monetization": "one-time",
+  "constraints": "Never upload fixtures; avoid reversible masking by default; make regex performance safe; warn that redaction rules are not a compliance certification."
+}
