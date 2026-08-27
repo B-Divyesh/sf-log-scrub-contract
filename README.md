@@ -47,6 +47,10 @@ log-scrub redact --config log-scrub.json app.jsonl > app.scrubbed.jsonl
 cat app.log | log-scrub redact --config log-scrub.json -
 ```
 
+If any assertion or entropy check still fails, `redact` writes no payload at
+all and exits `1`. Failed JSON and Markdown reports likewise withhold the
+payload, so a diagnostic artifact cannot become the leak it caught.
+
 Runtime token values can come from the policy's environment variable or an
 explicit `--token NAME=VALUE`. Values are never printed in diagnostics:
 

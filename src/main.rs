@@ -134,7 +134,8 @@ struct FileReport {
     ok: bool,
     hits: Vec<log_scrub_contract::Hit>,
     violations: Vec<log_scrub_contract::Violation>,
-    sanitized: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    sanitized: Option<String>,
 }
 
 #[derive(Serialize)]
@@ -218,13 +219,14 @@ fn check(args: CheckArgs) -> Result<i32, String> {
                 hits.extend(result.hits);
                 violations.extend(result.violations);
             }
+            let ok = violations.is_empty();
             files.push(FileReport {
                 path: path.display().to_string(),
                 format: "jsonl",
-                ok: violations.is_empty(),
+                ok,
                 hits,
                 violations,
-                sanitized: sanitized.join("\n"),
+                sanitized: if ok { Some(sanitized.join("\n")) } else { None },
             });
         } else {
             let (format, result) = scrub_by_format(&contract, &content, extension)?;
@@ -281,6 +283,33 @@ fn redact(args: RedactArgs) -> Result<i32, String> {
         InputFormat::Auto => scrub_by_format(&contract, &content, extension)?.1,
     };
     let ok = result.ok();
+    if !ok {
+        if args.json {
+            #[derive(Serialize)]
+            struct Blocked<'a> {
+                ok: bool,
+                output_withheld: bool,
+                hits: &'a [log_scrub_contract::Hit],
+                violations: &'a [log_scrub_contract::Violation],
+            }
+            println!(
+                "{}",
+                serde_json::to_string_pretty(&Blocked {
+                    ok: false,
+                    output_withheld: true,
+                    hits: &result.hits,
+                    violations: &result.violations,
+                })
+                .map_err(|error| format!("cannot serialize blocked result: {error}"))?
+            );
+        } else {
+            eprintln!(
+                "log-scrub: output withheld because {} possible leak(s) remain",
+                result.violations.len()
+            );
+        }
+        return Ok(1);
+    }
     let output = if args.json {
         serde_json::to_string_pretty(&result)
             .map_err(|error| format!("cannot serialize result: {error}"))?
@@ -437,13 +466,14 @@ fn compact_json(pretty: &str) -> Result<String, String> {
 }
 
 fn to_file_report(path: &Path, format: &'static str, result: ScrubResult) -> FileReport {
+    let ok = result.ok();
     FileReport {
         path: path.display().to_string(),
         format,
-        ok: result.ok(),
+        ok,
         hits: result.hits,
         violations: result.violations,
-        sanitized: result.content,
+        sanitized: ok.then_some(result.content),
     }
 }
 
@@ -529,10 +559,14 @@ fn markdown_report(report: &CheckReport) -> String {
         if !file.violations.is_empty() {
             output.push('\n');
         }
-        output.push_str(&format!(
-            "### Sanitized output\n\n```{}\n{}\n```\n\n",
-            file.format, file.sanitized
-        ));
+        if let Some(sanitized) = &file.sanitized {
+            output.push_str(&format!(
+                "### Sanitized output\n\n```{}\n{}\n```\n\n",
+                file.format, sanitized
+            ));
+        } else {
+            output.push_str("### Output withheld\n\nPossible leaks remain, so payload content is not included.\n\n");
+        }
     }
     output.push_str(
         "---\n\nLog Scrub Contract is a regression guard, not a compliance certification.\n",
@@ -582,6 +616,26 @@ mod tests {
         assert!(!markdown.contains("ada@example.test"));
         assert!(!markdown.contains("demo_sk_A1"));
         assert!(markdown.contains("[REDACTED:email]"));
+    }
+
+    #[test]
+    fn failing_report_withholds_remaining_payload() {
+        let contract = Contract::from_json(
+            r#"{"version":1,"rules":[],"assertions":[{"id":"no-email","kind":"deny_regex","pattern":"[a-z]+@[a-z.]+"}],"entropy":{"enabled":false}}"#,
+            &HashMap::new(),
+        )
+        .unwrap();
+        let result = contract.scrub_text("owner=private@example.test");
+        let report = assemble_report(vec![to_file_report(
+            Path::new("fixture.log"),
+            "text",
+            result,
+        )]);
+        let json = serde_json::to_string(&report).unwrap();
+        let markdown = markdown_report(&report);
+        assert!(!json.contains("private@example.test"));
+        assert!(!markdown.contains("private@example.test"));
+        assert!(markdown.contains("Output withheld"));
     }
 
     #[test]

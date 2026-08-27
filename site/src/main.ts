@@ -22,7 +22,9 @@ const findings = byId<HTMLUListElement>("findings");
 function evaluate(): void {
   try {
     const report = runDemo(fixture.value, pathRules.value.split(","));
-    result.textContent = report.content;
+    result.textContent = report.ok
+      ? report.content
+      : "Output withheld. A possible leak remains; add a rule and run the contract again.";
     resultState.textContent = report.ok ? "PASS" : "FAIL";
     resultState.className = `state ${report.ok ? "pass" : "fail"}`;
     summary.textContent = report.ok
