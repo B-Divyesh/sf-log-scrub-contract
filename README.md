@@ -121,5 +121,5 @@ Log Scrub Contract is for developers who own log drains and support export
 paths. It does not collect logs, crawl a repository for secrets, replace a
 runtime logger, upload samples, or certify compliance.
 
-See [CHANGELOG.md](CHANGELOG.md), [privacy](site/privacy.html), and
-[terms](site/terms.html). Licensed under the [MIT License](LICENSE).
+See [CHANGELOG.md](CHANGELOG.md), [privacy](site/privacy/index.html), and
+[terms](site/terms/index.html). Licensed under the [MIT License](LICENSE).

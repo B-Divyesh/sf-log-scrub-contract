@@ -67,9 +67,10 @@ transforms and smooth scrolling are removed and state changes are instant.
 - Hero: an original raster illustration of a top-down graph-paper log specimen
   being irreversibly redacted with black ink and audit ticks. Generated for
   this product with the factory `factory-image` deployment, then locally
-  converted to WebP at ≤300 KB. No logos, legible generated text, or third-party
-  source material. Final prompt and generator sidecar are stored with the
-  asset.
+  converted with ImageMagick to 1200×800 (75 KB) and 720×480 (26 KB) WebP
+  variants. No logos, legible generated text, or third-party source material.
+  The exact prompt, deployment, size, and quality are stored in
+  `site/public/assets/hero-lab.provenance.json`.
 - Icons and marks: simple braces, check marks, arrows, tape, and redaction bars
   drawn directly with CSS/HTML. They are functional marks rather than an icon
   library.

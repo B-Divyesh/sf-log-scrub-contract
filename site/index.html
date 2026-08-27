@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f4eedc" />
+    <meta name="description" content="A local CLI that regression-tests log redaction before logs leave your environment." />
+    <title>Log Scrub Contract — prove logs are safe before they leave</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preload" as="image" href="/assets/hero-lab-720.webp" media="(max-width: 720px)" />
+    <link rel="preload" as="image" href="/assets/hero-lab.webp" media="(min-width: 721px)" />
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to main content</a>
+    <div class="offline-note" id="offline-note" role="status" hidden>
+      Offline: the demo still works locally. License checks resume when you reconnect.
+    </div>
+    <header class="site-header">
+      <a class="brand" href="/" aria-label="Log Scrub Contract home">
+        <span class="brand-mark" aria-hidden="true">{■■}</span>
+        <span>Log Scrub Contract</span>
+      </a>
+      <nav aria-label="Main navigation">
+        <a href="#demo">Try it</a>
+        <a href="#install">Install</a>
+        <a href="#team-pack">Team Pack</a>
+        <a href="https://github.com/B-Divyesh/sf-log-scrub-contract">Source</a>
+      </nav>
+    </header>
+
+    <main id="main">
+      <section class="hero page-grid" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <p class="eyebrow"><span aria-hidden="true">№ 01</span> Local redaction proof</p>
+          <h1 id="hero-title">Know the log is clean <em>before</em> it leaves.</h1>
+          <p class="lede">Turn representative JSON, JSONL, and text logs into a regression contract. Scrub known fields, catch secret-shaped leftovers, and fail CI at the boundary.</p>
+          <div class="actions">
+            <a class="button primary" href="#install">Install the CLI <span aria-hidden="true">↓</span></a>
+            <a class="text-link" href="#demo">Try a fixture in this tab</a>
+          </div>
+          <p class="privacy-stamp"><span aria-hidden="true">✓</span> No upload. No telemetry. No reversible masks.</p>
+        </div>
+        <figure class="hero-figure">
+          <picture>
+            <source media="(max-width: 720px)" srcset="/assets/hero-lab-720.webp" />
+            <img src="/assets/hero-lab.webp" width="1200" height="800" alt="An overhead lab notebook with structured log marks, opaque black redaction bars, and hand-drawn verification ticks." fetchpriority="high" />
+          </picture>
+          <figcaption><span aria-hidden="true">↳</span> Evidence, not a vendor promise.</figcaption>
+        </figure>
+      </section>
+
+      <section class="signal-strip" aria-label="What the contract checks">
+        <div><strong>01</strong><span>Path rules</span><small>Scrub whole JSON values</small></div>
+        <div><strong>02</strong><span>Safe regex</span><small>Linear-time matching</small></div>
+        <div><strong>03</strong><span>Runtime tokens</span><small>Secrets stay out of config</small></div>
+        <div><strong>04</strong><span>Entropy</span><small>Catch unknown leftovers</small></div>
+      </section>
+
+      <section class="demo-section page-grid" id="demo" aria-labelledby="demo-title">
+        <div class="section-note">
+          <p class="eyebrow">Live bench test</p>
+          <h2 id="demo-title">Introduce a leak. Watch the contract object.</h2>
+          <p>This reduced browser specimen mirrors path, email, token-shape, and entropy checks. It runs entirely in this tab. Add <code>session_material</code> to the path rules to make the supplied fixture pass.</p>
+          <p class="annotation"><span aria-hidden="true">→</span> The Rust CLI adds JSONL, runtime tokens, safe configurable regex, reports, and CI exit codes.</p>
+        </div>
+        <div class="bench" aria-label="Interactive redaction demo">
+          <div class="field-row">
+            <label for="path-rules">Path rules <span>comma separated</span></label>
+            <input id="path-rules" type="text" value="request.headers.authorization, user.email" spellcheck="false" />
+          </div>
+          <div class="specimen-grid">
+            <div class="editor-wrap">
+              <label for="fixture">Before — fixture</label>
+              <textarea id="fixture" rows="14" spellcheck="false">{
+  "level": "info",
+  "user": { "email": "ada@example.test" },
+  "request": {
+    "path": "/support",
+    "headers": { "authorization": "Bearer demo_sk_A1b2C3d4E5f6" }
+  },
+  "session_material": "k9Qv2Lm8Xz4Rp7Tw3Ny6Bc1D"
+}</textarea>
+            </div>
+            <div class="editor-wrap result-wrap">
+              <div class="result-label"><span>After — scrubbed</span><span id="result-state" class="state waiting">Waiting</span></div>
+              <pre id="result" tabindex="0" aria-label="Sanitized result">Run the contract to inspect this specimen.</pre>
+            </div>
+          </div>
+          <div class="bench-actions">
+            <button class="button primary" id="run-contract" type="button">Run contract <span aria-hidden="true">⌘↵</span></button>
+            <button class="button quiet" id="reset-demo" type="button">Reset specimen</button>
+            <p id="demo-summary" aria-live="polite">Nothing has been evaluated yet.</p>
+          </div>
+          <ul class="findings" id="findings" aria-label="Contract findings"></ul>
+        </div>
+      </section>
+
+      <section class="workflow page-grid" aria-labelledby="workflow-title">
+        <div class="section-note">
+          <p class="eyebrow">The boundary test</p>
+          <h2 id="workflow-title">A small contract at every exit.</h2>
+        </div>
+        <ol class="steps">
+          <li><span class="step-number">1</span><div><h3>Capture representative fixtures</h3><p>Use fake, realistically shaped examples for every production drain and support export.</p></div></li>
+          <li><span class="step-number">2</span><div><h3>Declare irreversible rules</h3><p>Target JSON paths, regex shapes, and tokens supplied only at runtime. Matches become opaque markers.</p></div></li>
+          <li><span class="step-number">3</span><div><h3>Gate the route out</h3><p>Run the same fixtures in CI. A deny assertion or high-entropy remainder exits 1 before deploy.</p></div></li>
+        </ol>
+      </section>
+
+      <section class="install page-grid" id="install" aria-labelledby="install-title">
+        <div class="section-note">
+          <p class="eyebrow">Five-minute setup</p>
+          <h2 id="install-title">One binary. One policy. Exit means something.</h2>
+          <p>Exit 0 is a passing contract, 1 is a possible leak, and 2 is an invalid invocation, policy, or fixture.</p>
+        </div>
+        <div class="code-notebook">
+          <div class="code-tab"><span>Terminal</span><button class="copy-button" type="button" data-copy="cargo install log-scrub-contract&#10;log-scrub init&#10;log-scrub check --config log-scrub.json fixtures/">Copy commands</button></div>
+          <pre tabindex="0" aria-label="CLI installation example"><code><span class="prompt">$</span> cargo install log-scrub-contract
+<span class="prompt">$</span> log-scrub init
+<span class="prompt">$</span> log-scrub check --config log-scrub.json fixtures/
+
+<span class="success">PASS</span> fixtures/drain.json — 3 redactions, 0 violations
+<span class="success">Contract passed</span></code></pre>
+          <div class="code-links">
+            <a href="https://github.com/B-Divyesh/sf-log-scrub-contract#policy-format">Policy reference</a>
+            <a href="https://github.com/B-Divyesh/sf-log-scrub-contract#ci">CI example</a>
+            <a href="https://github.com/B-Divyesh/sf-log-scrub-contract/releases">Release binaries</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="team-pack page-grid" id="team-pack" aria-labelledby="pack-title">
+        <div class="pack-card">
+          <div>
+            <p class="eyebrow">Optional field notes</p>
+            <h2 id="pack-title">Team Pack <span class="price">$29 once</span></h2>
+            <p>Keep the complete CLI free. Unlock convenience templates for GitHub Actions, common cloud headers, support bundles, and multi-drain review checklists.</p>
+            <ul class="check-list">
+              <li>12 annotated policy presets</li>
+              <li>CI matrices for multiple drains</li>
+              <li>Review and incident-response checklists</li>
+              <li>Future template updates for this major version</li>
+            </ul>
+            <p class="fine-print">One-time purchase. Sociobot/Dodo is the merchant of record; refunds are handled there and revoke the license automatically.</p>
+          </div>
+          <div class="license-panel" id="license-panel">
+            <p id="license-status" class="license-status" aria-live="polite">The free CLI is fully functional.</p>
+            <a class="button primary" id="buy-link" href="https://api.sociobot.in/api/v1/products/log-scrub-contract/checkout">Get the Team Pack</a>
+            <details>
+              <summary>Have a license? Restore it</summary>
+              <form id="license-form">
+                <label for="license-token">License token</label>
+                <input id="license-token" name="license" type="text" autocomplete="off" required />
+                <button class="button quiet" type="submit">Verify license</button>
+              </form>
+            </details>
+          </div>
+        </div>
+        <div class="pack-unlocked" id="pack-unlocked" hidden>
+          <h3>Team Pack unlocked <span aria-hidden="true">✓</span></h3>
+          <p>Your templates are ready on this device. They never contain your license or fixture data.</p>
+          <div class="template-grid">
+            <button type="button" class="template" data-pack-template="github" aria-label="Copy GitHub Actions matrix template"><strong>GitHub Actions matrix</strong><span>Copy template</span></button>
+            <button type="button" class="template" data-pack-template="support" aria-label="Copy support bundle policy template"><strong>Support bundle policy</strong><span>Copy template</span></button>
+            <button type="button" class="template" data-pack-template="review" aria-label="Copy drain review checklist"><strong>Drain review checklist</strong><span>Copy checklist</span></button>
+          </div>
+        </div>
+      </section>
+
+      <section class="caveat page-grid" aria-labelledby="caveat-title">
+        <div class="redaction-mark" aria-hidden="true"></div>
+        <div><h2 id="caveat-title">Proof of your rules, not a compliance certificate.</h2><p>Entropy is a useful alarm, not a verdict. Test every real egress path, review allow patterns, rotate any credential that ever appeared in an uncontrolled log, and keep runtime redaction in place.</p></div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="brand"><span class="brand-mark" aria-hidden="true">{■■}</span><span>Log Scrub Contract</span></div>
+      <p>Local-first security tooling from the Param Factory.</p>
+      <nav aria-label="Legal navigation"><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a><a href="https://github.com/B-Divyesh/sf-log-scrub-contract/blob/main/LICENSE">MIT License</a></nav>
+    </footer>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
