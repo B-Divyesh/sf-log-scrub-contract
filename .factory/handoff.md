@@ -1,52 +1,66 @@
-# Verification handoff — FAIL
+# Repair handoff — Azure Static Web Apps response policy
 
-**Candidate:** `08d3c0b6adba7cb0d6be0636dc4a11fb86861f53`
+**Work order:** `log-scrub-contract-repair-2`
+**Base:** `fde436d5e2893a8414988d02a81d37f185d90f8b`
+**Deployment:** Azure Static Web Apps Standard static output (`dist/site`)
 
-**Live URL:** <https://log-scrub-contract.sociobot.in/>
-**Verified:** 2026-08-27 UTC
+## What changed
 
-## Release status: FAIL — deployment configuration blocker
+- Replaced the ignored `_headers` artifact with
+  `site/public/staticwebapp.config.json`, which Vite copies to the root of
+  `dist/site` as required by Azure Static Web Apps.
+- Added global containment headers: the restrictive CSP (including
+  `frame-ancestors 'none'`), deny-by-default Permissions-Policy,
+  `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, and the existing
+  strict referrer policy.
+- Made the document shell globally revalidate with `Cache-Control: no-cache`,
+  explicitly keeps `/sw.js` on that policy, and gives only Vite's hashed
+  `/assets/*.{css,js}` files `public, max-age=31536000, immutable`.
+- Added `npm run check:deployment` to assert the exact emitted configuration,
+  confirm no obsolete `_headers` file is in `dist/site`, and confirm hashed
+  CSS and JS are covered. Added `npm run verify:live-headers` to fetch the
+  live shell, worker, and shell-referenced hashed assets and require those
+  exact response values.
 
-The CLI, package, browser demo, PWA, privacy behavior, accessibility checks,
-and production build pass. The preceding license-token Cache Storage defect is
-fixed and the live site is byte-identical to this candidate. Do **not** release
-yet: production does not apply the checked-in `_headers` policy.
+## Verification
 
-### Medium defects
-
-1. Live `/` and `/sw.js` have no `Content-Security-Policy`,
-   `Permissions-Policy`, or `X-Frame-Options`, despite the candidate declaring
-   them in `_headers`.
-2. Live hashed JS/CSS use `Cache-Control: public, must-revalidate, max-age=30`
-   rather than the candidate's one-year immutable policy.
-
-Configure the static host to honor `_headers` (or reproduce those exact rules),
-then repeat live header verification. See
-`.factory/verification-2.md` for full evidence.
-
-## How verified
-
-From a clean detached clone: `npm ci`, `cargo test --locked`,
-`cargo clippy --locked --all-targets -- -D warnings`, `npm test`,
-`npm run build`, and `cargo package --locked` all passed. A clean unpacked
-consumer installed the crate and exercised `--help`, init/check, withheld
-leak output, malformed input recovery, and the 10 MiB boundary.
-
-Local and live axe checks found 0 serious/critical findings on root, privacy,
-and terms. Desktop/390 px keyboard, focus, reduced-motion, console/error,
-offline reload, service-worker update, cache-token regression, and live
-artifact identity checks passed. All 13 static files SHA-256 match live.
-
-Run/package with:
+Completed locally:
 
 ```sh
 npm ci
 npm test
-cargo clippy --locked --all-targets -- -D warnings
 npm run build
+npm run check:deployment
+npm run test:e2e -- http://127.0.0.1:4173/
+cargo clippy --locked --all-targets -- -D warnings
+```
+
+Results:
+
+- `npm test`: passed (13 Rust unit tests, 1 doctest, 3 Vitest tests).
+- `npm run build`: passed; `dist/site/staticwebapp.config.json` is emitted.
+- `npm run check:deployment`: passed; found two hashed CSS/JS assets under the
+  immutable Azure route.
+- `npm run test:e2e` against `vite preview`: passed the mobile keyboard,
+  FAIL/PASS/error recovery, license stripping/verification, offline state, and
+  service-worker Cache Storage token regression checks.
+- Clippy: passed with `-D warnings`.
+
+After the Standard static deployment completes, run:
+
+```sh
+npm run verify:live-headers
 cargo package --locked
 ```
 
-Lighthouse could not run in this verification container because no system
-Chrome was available and its Playwright Chromium crashed under Lighthouse;
-no Lighthouse score is claimed.
+The live-header command intentionally fails until the new artifact has reached
+Azure; it is the release check for the two verifier-2 findings. `cargo package`
+is left for the clean committed tree so Cargo can perform its normal dirty-tree
+guard without `--allow-dirty`.
+
+## Known gaps / next step
+
+No product or PWA behavior changes are outstanding. Confirm the pushed build
+is served by the Azure Static Web Apps **Standard** resource, then run the live
+header command above and record its output. Lighthouse remains unclaimed: the
+previous verifier could not run it because the container had no usable Chrome.

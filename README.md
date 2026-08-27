@@ -113,6 +113,8 @@ cargo package --locked
 npm install
 npm test
 npm run build          # CLI release build + site -> dist/site
+npm run check:deployment
+npm run verify:live-headers  # checks the deployed production response policy
 npm run dev            # local documentation site
 ```
 
@@ -120,9 +122,12 @@ The static site is Vite + TypeScript and includes an offline, in-browser demo.
 Its payload never leaves the tab. The optional Team Pack uses the registered
 Dodo Live checkout at Sociobot; a returned `license` parameter is removed from
 the address bar before use and service-worker caches never store token-bearing
-URLs or entitlement responses. Production deployment serves `dist/site` as
-standard static docs, including the `_headers` cache and browser-security
-policy.
+URLs or entitlement responses. Production deployment serves `dist/site` as an
+Azure Static Web Apps Standard static site. Its root-level
+`staticwebapp.config.json` applies the browser-security policy, shell and
+service-worker revalidation, and one-year immutable caching for Vite's hashed
+CSS/JS assets. `npm run check:deployment` verifies the exact built config;
+`npm run verify:live-headers` verifies the live headers after deployment.
 
 ## Project scope
 
