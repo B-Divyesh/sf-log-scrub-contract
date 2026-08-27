@@ -46,21 +46,24 @@ Results:
   service-worker Cache Storage token regression checks.
 - Clippy: passed with `-D warnings`.
 
-After the Standard static deployment completes, run:
+Completed after deployment to the existing `sf-log-scrub-contract` Azure Static
+Web Apps **Standard** resource:
 
 ```sh
 npm run verify:live-headers
 cargo package --locked
 ```
 
-The live-header command intentionally fails until the new artifact has reached
-Azure; it is the release check for the two verifier-2 findings. `cargo package`
-is left for the clean committed tree so Cargo can perform its normal dirty-tree
-guard without `--allow-dirty`.
+- Live header verification passed on
+  `https://log-scrub-contract.sociobot.in`: the shell has the exact CSP,
+  Permissions-Policy, anti-framing headers, and `no-cache`; `/sw.js` has
+  `no-cache`; both shell-referenced hashed assets have the exact one-year
+  immutable policy.
+- `cargo package --locked` passed on the clean committed tree (9 files,
+  63.8 KiB; 17.5 KiB compressed).
 
 ## Known gaps / next step
 
-No product or PWA behavior changes are outstanding. Confirm the pushed build
-is served by the Azure Static Web Apps **Standard** resource, then run the live
-header command above and record its output. Lighthouse remains unclaimed: the
-previous verifier could not run it because the container had no usable Chrome.
+No product or PWA behavior changes are outstanding. Lighthouse remains
+unclaimed: the previous verifier could not run it because the container had no
+usable Chrome.
