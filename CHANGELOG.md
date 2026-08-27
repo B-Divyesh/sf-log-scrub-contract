@@ -11,4 +11,5 @@ this project uses semantic versioning.
 - Path, safe-regex, and runtime token redaction rules.
 - Deny-regex assertions and configurable entropy checks.
 - Human, JSON, and privacy-safe Markdown reports.
+- Payload withholding whenever a post-redaction check still finds a leak.
 - Static documentation, offline browser demo, and optional Team Pack unlock.
