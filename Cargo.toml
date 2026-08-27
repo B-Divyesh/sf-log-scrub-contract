@@ -10,6 +10,7 @@ homepage = "https://log-scrub-contract.sociobot.in"
 readme = "README.md"
 keywords = ["logs", "redaction", "security", "cli", "ci"]
 categories = ["command-line-utilities", "development-tools::testing"]
+include = ["src/**", "Cargo.toml", "Cargo.lock", "README.md", "LICENSE", "CHANGELOG.md"]
 
 [lib]
 name = "log_scrub_contract"
@@ -30,4 +31,3 @@ tempfile = "3.21.0"
 [profile.release]
 lto = "thin"
 strip = true
-

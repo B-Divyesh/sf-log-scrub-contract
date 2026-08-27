@@ -1,4 +1,4 @@
-use clap::{Args, Parser, Subcommand};
+use clap::{Args, Parser, Subcommand, ValueEnum};
 use log_scrub_contract::{Contract, ScrubResult};
 use serde::Serialize;
 use std::collections::HashMap;
@@ -90,12 +90,23 @@ struct RedactArgs {
     /// Input file, or - for stdin
     #[arg(default_value = "-")]
     input: PathBuf,
+    /// Input format (auto detects JSON files and a single JSON stdin value)
+    #[arg(long, value_enum, default_value_t = InputFormat::Auto)]
+    format: InputFormat,
     /// Write sanitized content to this file instead of stdout
     #[arg(short, long)]
     output: Option<PathBuf>,
     /// Wrap sanitized output and evidence in JSON
     #[arg(long)]
     json: bool,
+}
+
+#[derive(Clone, Copy, ValueEnum)]
+enum InputFormat {
+    Auto,
+    Json,
+    Jsonl,
+    Text,
 }
 
 #[derive(Args)]
@@ -185,6 +196,9 @@ fn check(args: CheckArgs) -> Result<i32, String> {
     let mut files = Vec::new();
     for path in paths {
         let content = read_file(&path)?;
+        if content.trim().is_empty() {
+            return Err(format!("fixture is empty: {}", path.display()));
+        }
         let extension = path
             .extension()
             .and_then(|value| value.to_str())
@@ -255,7 +269,17 @@ fn redact(args: RedactArgs) -> Result<i32, String> {
             .unwrap_or("");
         (content, extension)
     };
-    let (_, result) = scrub_by_format(&contract, &content, extension)?;
+    let result = match args.format {
+        InputFormat::Json => contract
+            .scrub_json(&content)
+            .map_err(|error| error.to_string())?,
+        InputFormat::Jsonl => scrub_jsonl(&contract, &content, &args.input)?,
+        InputFormat::Text => contract.scrub_text(&content),
+        InputFormat::Auto if extension.eq_ignore_ascii_case("jsonl") => {
+            scrub_jsonl(&contract, &content, &args.input)?
+        }
+        InputFormat::Auto => scrub_by_format(&contract, &content, extension)?.1,
+    };
     let ok = result.ok();
     let output = if args.json {
         serde_json::to_string_pretty(&result)
@@ -270,6 +294,31 @@ fn redact(args: RedactArgs) -> Result<i32, String> {
         println!("{output}");
     }
     Ok(if ok { 0 } else { 1 })
+}
+
+fn scrub_jsonl(contract: &Contract, content: &str, path: &Path) -> Result<ScrubResult, String> {
+    let mut sanitized = Vec::new();
+    let mut hits = Vec::new();
+    let mut violations = Vec::new();
+    for (index, line) in content.lines().enumerate() {
+        if line.trim().is_empty() {
+            continue;
+        }
+        let result = contract
+            .scrub_json(line)
+            .map_err(|error| format!("{} line {}: {error}", path.display(), index + 1))?;
+        sanitized.push(compact_json(&result.content)?);
+        hits.extend(result.hits);
+        violations.extend(result.violations);
+    }
+    if sanitized.is_empty() {
+        return Err(format!("{} contains no JSONL records", path.display()));
+    }
+    Ok(ScrubResult {
+        content: sanitized.join("\n"),
+        hits,
+        violations,
+    })
 }
 
 fn init(args: InitArgs) -> Result<i32, String> {
@@ -548,5 +597,17 @@ mod tests {
           "entropy":{"enabled":true,"min_length":24,"threshold":4.2,"allow":["^[0-9a-f]{40}$"]}
         }"#;
         assert!(Contract::from_json(policy, &HashMap::new()).is_ok());
+    }
+
+    #[test]
+    fn jsonl_redaction_preserves_records() {
+        let contract = Contract::from_json(STARTER_POLICY, &HashMap::new()).unwrap();
+        let value: serde_json::Value = serde_json::from_str(STARTER_FIXTURE).unwrap();
+        let line = serde_json::to_string(&value).unwrap();
+        let input = format!("{line}\n{line}\n");
+        let result = scrub_jsonl(&contract, &input, Path::new("fixture.jsonl")).unwrap();
+        assert_eq!(result.content.lines().count(), 2);
+        assert_eq!(result.hits.len(), 4);
+        assert!(result.ok());
     }
 }
