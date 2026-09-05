@@ -1,26 +1,28 @@
-# Verification handoff — PASS
+# Review handoff — FAIL
 
-**Work order:** `log-scrub-contract-verify-3`
-**Verified candidate:** `3d77204c6d44683df41639b8109c9831b23425c2`
+**Work order:** `log-scrub-contract-review-1`
 **Live URL:** <https://log-scrub-contract.sociobot.in/>
-**Verdict:** **PASS — no Critical, High, Medium, or Low product defects found.**
+**Implementation reviewed:** `f1219aeb47d050626e08c8d3d6e34f1207298058`
+**Documentation head:** `f3c10638261636dbc5d5ffea573e1857c67bf15f`
+**Verdict:** **FAIL — 7 findings and 18 untested public claims.**
 
-## What was independently verified
+No product code was changed. See `.factory/review-1.md` for full evidence.
 
-- A clean detached clone installed successfully and passed Rust tests (13 unit
-  tests plus one doctest), Clippy with `-D warnings`, formatting, `npm test`,
-  exact production build, deployment-policy validation, and Cargo package
-  verification.
-- The ready-to-publish crate installed into an isolated consumer prefix and
-  its public CLI passed normal JSON/JSONL operation, secret-output withholding,
-  malformed-input recovery, repeat-init recovery, and the 10 MiB boundary.
-  Publish with `cargo package --locked`; do not publish from this repository.
-- Local and live browser E2E, axe, keyboard, mobile/desktop, reduced-motion,
-  privacy, service-worker update/offline, Cache Storage, header/cache, and
-  byte-identity checks passed. The 12 publicly served assets hash-match the
-  candidate; Azure consumes the non-public deployment config.
+## What was verified
 
-## How to re-run
+- Fresh phone and desktop live-page checks, sample reset/PASS output, keyboard, reduced-motion/offline behavior, privacy request behavior, links, legal pages, metadata, and default 404 responses.
+- Clean-checkout `npm ci`, Rust tests, Clippy, formatting, site tests, build, deployment-policy checks, package verification, live E2E, and live headers.
+- An extracted packed crate installed in an isolated consumer prefix. Normal, invalid, boundary, repeated-init/forced recovery, and secret-withholding paths were exercised.
+- Axe recorded zero serious/critical findings on live `/`, `/privacy/`, and `/terms/`. The two previous deployment findings are fixed: token data is not cached and the live security/cache headers now pass their checks.
+
+## Required next work
+
+1. Add `.factory/claims.json` and individually tagged clean-state tests for all public claims, or remove unsupported copy.
+2. Ship the CLI's bundled example and `demo`/`--demo` command plus a real-binary terminal recording.
+3. Build the labelled, isolated direct demo route and designed 404 page.
+4. Complete metadata, plain-words/copy audit, and the shared legal-page header.
+
+## Re-run
 
 ```sh
 npm ci
@@ -28,15 +30,8 @@ cargo test --locked
 cargo clippy --locked --all-targets -- -D warnings
 cargo fmt --check
 npm test
-npm run build
-npm run check:deployment
+npm run verify:deployment
 cargo package --locked
 npm run test:e2e -- https://log-scrub-contract.sociobot.in/
 npm run verify:live-headers
 ```
-
-See `.factory/verification-3.md` for exact command evidence, response-policy
-values, accessibility/performance findings, and the only known verification
-limitation: Lighthouse could not launch against the container's non-system
-Chromium, so no Lighthouse score is claimed. This is not a product defect;
-all applicable browser and budget checks passed.
