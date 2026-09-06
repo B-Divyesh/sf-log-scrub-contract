@@ -1,96 +1,72 @@
-# Repair handoff — implementation complete; production propagation pending
+# Verification 4 handoff — product not accepted
 
-**Work order:** `log-scrub-contract-repair-3`  
-**Implementation SHA:** `cdf29d24ce4a70daa4b3a931a28038afdae4897b`  
-**Live URL:** <https://log-scrub-contract.sociobot.in/>  
+**Work order:** `log-scrub-contract-verify-4`
+**Verdict:** **FAIL**
+**Implementation SHA:** `cdf29d24ce4a70daa4b3a931a28038afdae4897b`
+**Documentation baseline:** `95531d2bd2db8647e92088baa68e60953c0ebdd9`
+**Live URL:** <https://log-scrub-contract.sociobot.in/>
 **Date:** 2026-09-06 UTC
 
-## Job, audience, and first action
+## Current result
 
-Log Scrub Contract lets security-conscious developers test that configured
-secrets and personal data are removed before structured logs leave a drain,
-support bundle, or CI artifact. The first screen says this, names developers
-who forward structured logs, and leads with **Try it with sample data**. That
-action opens `/demo/` with a populated support-log result.
+The repaired implementation is deployed. All 17 public build files match the
+clean `cdf29d2` build, `/demo/` is live, and an unknown route returns the
+designed page with HTTP 404.
 
-## Completed repair work
+The release still fails with three findings:
 
-| Review finding | Resolution |
-|---|---|
-| R1: no claims registry | Added `.factory/claims.json` with 18 public claims. Each names exactly one `@claim:<id>` clean-state test command. The browser/CLI checks are outcome-based, not source-string checks. |
-| R2: no CLI demo or sample | Added `examples/demo/`, packaged it in the crate, and added `log-scrub demo [--output DIRECTORY]`. It creates an isolated temporary sample, runs the real check, writes `scrub-report.md`, and prints its location. Added a self-hosted SVG terminal recording of that command. |
-| R3: ordinary browser sample was not a sandbox | Added `/demo/` with a persistent **Demo — sample data, nothing is saved to your real data** banner, a populated passing sample, **Reset demo**, and **Start for real**. Edits use only `demo:log-scrub-contract:` local-storage keys. |
-| R4: missing demo/404 pages | Added the built `/demo/` page and a product-styled `404.html`; Azure `responseOverrides` rewrites real 404s to it with status 404. |
-| R5: incomplete metadata | Added canonical, Open Graph, Twitter, Apple touch icon, and a 1200×630 product-derived social card to every route. |
-| R6: first-screen/copy gaps | Rewrote the first screen in plain words, replaced mood headings, added the self-hosted terminal recording, and added `.factory/copy-audit.md`. |
-| R7: legal headers | Privacy and Terms now have the shared wordmark, skip link, navigation, footer, build marker, metadata, and touch icon. |
+1. **High:** the $29 Team Pack promises 12 policy presets and other contents,
+   but a valid unlock exposes only one policy, one CI matrix, and one review
+   checklist. Its tagged claim test checks marketing text instead of delivered
+   contents.
+2. **Medium:** Privacy says no fixture or policy is stored in browser storage,
+   while demo edits are stored and restored from two documented `demo:` keys.
+3. **Low:** every footer says `build source` instead of an actual build ID.
 
-The former cache-token and response-header fixes remain present. The new
-browser regression verifies the cache contains no license bytes after a return
-flow; the static deployment-policy check retains CSP, headers, immutable
-hashed assets, and worker revalidation.
+There are two untested public claims: delivered Team Pack contents and the
+Privacy page's no-fixture-or-policy-storage statement. See
+`.factory/verification-4.md` for evidence and required outcomes.
 
-## Verification
+## What passed
 
-### Fresh checkout
+- A detached origin-backed checkout of `cdf29d2` passed `npm ci`, Rust tests,
+  Clippy with warnings denied, formatting, `npm test` (21 tests), the release
+  build, deployment-policy validation, and `cargo package --locked`.
+- All 18 declared claim commands passed individually. The paid-contents
+  command is nevertheless incomplete because it asserts copy, not delivery.
+- A separately installed packaged binary passed demo, normal, possible-leak,
+  malformed-input, size-boundary, repeated-init, and force-recovery paths.
+- Fresh 1440×900 and 390×844 browsers passed the one-click sample, persistent
+  demo label, populated output, reset isolation, keyboard, focus, reduced
+  motion, touch-target, offline-reload, legal-route, metadata, link, 404,
+  request-isolation, and license-lock checks.
+- Axe found zero violations on all route types. Mobile Lighthouse scored 100
+  in performance, accessibility, best practices, and SEO, with 1.1 s LCP,
+  zero CLS, and 10 ms total blocking time.
+- Live security and caching headers pass. Initial JS is 8.43 kB, CSS is
+  15.79 kB, and the mobile hero is 26.47 kB.
 
-An isolated clone of `cdf29d2` completed:
+## Evidence and re-run
+
+The full report is `.factory/verification-4.md`. Required factory copies are
+`/work/.evidence/qa-report.md` and `/work/.evidence/qa-result.json`. Supporting
+browser, axe, Lighthouse, claim-command, and hash evidence is also under
+`/work/.evidence/`.
 
 ```sh
 npm ci
 cargo test --locked
 cargo clippy --locked --all-targets -- -D warnings
 cargo fmt --check
+npm test
 npm run build
 npm run check:deployment
 cargo package --locked
-```
-
-All passed. `cargo package` verified an 11-file crate containing the bundled
-examples. Every one of the 18 commands declared in `.factory/claims.json` was
-then run from that clone; all passed. The `free-cli` claim packages, extracts,
-installs, and invokes the public binary in an isolated consumer prefix.
-
-### Local built-site checks
-
-- `npm test` passed: 13 Rust tests, 1 doctest, 3 demo tests, and 18 claim
-  tests.
-- `npm run build` passed and emitted `dist/site`.
-- `npm run check:deployment` passed.
-- `npm run test:e2e -- http://127.0.0.1:4173/` passed after the direct demo,
-  404 page, reset isolation, keyboard PASS/FAIL/ERROR recovery, offline note,
-  license return stripping, and Cache Storage scan were exercised.
-- `npm run verify:url -- http://127.0.0.1:4173/` passed at 1440×900 and
-  390×844 for `/`, `/demo/`, `/privacy/`, `/terms/`, and `/404.html`.
-- Axe recorded zero violation types on each of those local production routes.
-- A fresh desktop and phone browser showed the job, audience, and sample-demo
-  first action before scrolling. The phone view stacks the content without
-  horizontal overflow.
-- Production build budgets: initial JS 8.43 kB (3.73 kB gzip), CSS 15.79 kB
-  (4.24 kB gzip), and the existing mobile hero remains below 300 kB. No
-  third-party font, script, or analytics request is shipped.
-
-Lighthouse remains unmeasured because the supplied Chromium cannot be launched
-by the available Lighthouse runner. No Lighthouse score is claimed.
-
-## Deployment status and known gap
-
-`cdf29d2` was pushed to `origin/main`. At the time of this handoff, the HTTPS
-origin still returns the previous page title and `main-Bygm84Sp.js`; `/demo/`
-still returns the old host 404. This is an external static-host propagation
-gap, not a product-build mismatch. The repository contains no deployment
-credential or product deployment wrapper. A scoped `swa deploy dist/site`
-attempt authenticated Azure but stalled while discovering project settings, so
-it was cancelled; its generated local credential file was removed. No
-infrastructure or shared service was changed. The next operator should
-trigger/confirm the product's normal static deployment for `cdf29d2`, then run:
-
-```sh
 npm run test:e2e -- https://log-scrub-contract.sociobot.in/
 npm run verify:url -- https://log-scrub-contract.sociobot.in/
-node scripts/a11y.mjs https://log-scrub-contract.sociobot.in/demo/ /tmp/live-demo-axe.json
 npm run verify:live-headers
 ```
 
-After the deployment moves, verify an unknown live URL returns HTTP 404 with
-the designed page and compare the live `main-*.js` hash with the built asset.
+No product code, infrastructure, billing resource, or secret was changed by
+this verification. Repair the three findings, add outcome-based coverage for
+the two claims, deploy the new implementation, then run fresh live QA.
