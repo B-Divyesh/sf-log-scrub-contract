@@ -79,9 +79,11 @@ by the available Lighthouse runner. No Lighthouse score is claimed.
 origin still returns the previous page title and `main-Bygm84Sp.js`; `/demo/`
 still returns the old host 404. This is an external static-host propagation
 gap, not a product-build mismatch. The repository contains no deployment
-credential or product deployment wrapper, and no infrastructure or shared
-service was changed. The next operator should trigger/confirm the product's
-normal static deployment for `cdf29d2`, then run:
+credential or product deployment wrapper. A scoped `swa deploy dist/site`
+attempt authenticated Azure but stalled while discovering project settings, so
+it was cancelled; its generated local credential file was removed. No
+infrastructure or shared service was changed. The next operator should
+trigger/confirm the product's normal static deployment for `cdf29d2`, then run:
 
 ```sh
 npm run test:e2e -- https://log-scrub-contract.sociobot.in/
