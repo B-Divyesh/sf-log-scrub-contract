@@ -1,0 +1,1 @@
+Test log redaction locally before drains, support bundles, or CI artifacts leave your environment.

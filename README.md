@@ -1,9 +1,9 @@
 # Log Scrub Contract
 
-Prove that logs are safe **before** a drain, support bundle, or CI artifact
-leaves your environment. `log-scrub` applies path, linear-time regex, and
-runtime token rules to JSON, JSONL, or text fixtures, then fails if deny
-assertions or high-entropy values remain.
+Test log redaction before a drain, support bundle, or CI artifact leaves your
+environment. `log-scrub` applies path, safe regex, and runtime token rules to
+JSON, JSONL, or text fixtures, then fails if deny assertions or high-entropy
+values remain.
 
 Everything runs locally. Fixtures, tokens, and reports are never uploaded and
 there is no telemetry. This is a regression guard, not a compliance
@@ -20,6 +20,29 @@ log-scrub --help
 
 The publish-ready crate starts at `0.1.0`; registry publishing is handled by
 the Param Factory, not from this repository.
+
+## Try the bundled sample
+
+Run the same realistic support-log sample used by the landing-page recording:
+
+```sh
+log-scrub demo
+```
+
+The command copies the shipped files in `examples/demo/` to a new temporary
+directory, runs the contract, writes a privacy-safe Markdown report, and
+prints where it put that report. It never changes your project. Choose a new,
+empty output directory when you want to keep the sample:
+
+```sh
+log-scrub demo --output /tmp/my-log-scrub-sample
+```
+
+Try the browser sandbox at
+<https://log-scrub-contract.sociobot.in/demo/>. It starts with populated
+sample output, labels itself as a demo, keeps edits under a separate
+`demo:log-scrub-contract:` local-storage prefix, and resets without touching
+real data.
 
 ## Usage
 
@@ -86,7 +109,7 @@ numeric segment selects an array index, for example `events.*.user.email`.
 Every redaction replaces the entire matched value with an opaque marker such
 as `[REDACTED:authorization]`; partial or reversible masking is not supported.
 Rust's `regex` engine rejects unsupported look-around/backreferences and
-guarantees linear-time matching, avoiding catastrophic backtracking.
+avoids catastrophic backtracking.
 
 Entropy checks inspect token-like runs after redaction. Tune them with known
 non-secret allow patterns; a high-entropy finding is evidence to investigate,
@@ -118,8 +141,15 @@ npm run verify:live-headers  # checks the deployed production response policy
 npm run dev            # local documentation site
 ```
 
-The static site is Vite + TypeScript and includes an offline, in-browser demo.
-Its payload never leaves the tab. The optional Team Pack uses the registered
+`npm test` includes every public claim in `.factory/claims.json`. Run one
+claim from a clean checkout with its listed command, for example:
+
+```sh
+npm test -- --grep @claim:offline-demo
+```
+
+The static site is Vite + TypeScript and includes an offline, in-browser demo
+at `/demo/`. Its payload never leaves the tab. The optional Team Pack uses the registered
 Dodo Live checkout at Sociobot; a returned `license` parameter is removed from
 the address bar before use and service-worker caches never store token-bearing
 URLs or entitlement responses. Production deployment serves `dist/site` as an
@@ -128,6 +158,8 @@ Azure Static Web Apps Standard static site. Its root-level
 service-worker revalidation, and one-year immutable caching for Vite's hashed
 CSS/JS assets. `npm run check:deployment` verifies the exact built config;
 `npm run verify:live-headers` verifies the live headers after deployment.
+The factory deploys the committed static `dist/site` output; do not add cloud
+credentials or deploy from this repository.
 
 ## Project scope
 

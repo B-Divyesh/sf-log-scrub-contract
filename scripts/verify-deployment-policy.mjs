@@ -54,6 +54,9 @@ const workerRoute = config.routes?.find(({ route }) => route === "/sw.js");
 if (workerRoute?.headers?.["Cache-Control"] !== "no-cache") {
   fail("/sw.js must explicitly revalidate");
 }
+if (config.responseOverrides?.["404"]?.rewrite !== "/404.html" || config.responseOverrides?.["404"]?.statusCode !== 404) {
+  fail("the 404 response must rewrite to the designed /404.html document with status 404");
+}
 
 const assetFiles = await readdir(assets);
 const hashedScriptsAndStyles = assetFiles.filter((file) => /-[A-Za-z0-9_-]{8,}\.(?:css|js)$/.test(file));

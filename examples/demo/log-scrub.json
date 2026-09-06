@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "rules": [
+    { "id": "authorization", "kind": "path", "path": "request.headers.authorization" },
+    { "id": "customer-email", "kind": "regex", "pattern": "(?i)[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,}" }
+  ],
+  "assertions": [
+    { "id": "no-bearer-token", "kind": "deny_regex", "pattern": "(?i)bearer\\s+[a-z0-9._-]{12,}" }
+  ],
+  "entropy": { "enabled": true, "min_length": 24, "threshold": 4.2, "allow": [] }
+}

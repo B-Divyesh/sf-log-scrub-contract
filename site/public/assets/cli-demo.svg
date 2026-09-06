@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="430" viewBox="0 0 960 430" role="img" aria-labelledby="title description">
+  <title id="title">Log Scrub Contract CLI demo</title>
+  <desc id="description">A terminal-style transcript where log-scrub demo checks a support log with two redactions and zero possible leaks.</desc>
+  <rect width="960" height="430" fill="#1d2523"/>
+  <rect x="28" y="28" width="904" height="374" fill="#151918" stroke="#b8b29f" stroke-width="2"/>
+  <circle cx="56" cy="54" r="8" fill="#a63d2f"/><circle cx="82" cy="54" r="8" fill="#805500"/><circle cx="108" cy="54" r="8" fill="#245c4a"/>
+  <g font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="22" fill="#f7f0dd">
+    <text x="60" y="112" fill="#eb8c79">$</text><text x="86" y="112">log-scrub demo</text>
+    <text x="60" y="158">Running the bundled support-log sample…</text>
+    <text x="60" y="204" fill="#89d4b4">PASS</text><text x="126" y="204"> fixtures/support.json — 2 redactions, 0 violations</text>
+    <text x="60" y="250" fill="#89d4b4">Contract passed</text><text x="234" y="250">: 1 file, 2 redactions, 0 violations</text>
+    <text x="60" y="296">Report: /tmp/log-scrub-demo-…/scrub-report.md</text>
+    <text x="60" y="350" fill="#eb8c79">$</text><rect x="86" y="332" width="15" height="25" fill="#f7f0dd"/>
+  </g>
+</svg>

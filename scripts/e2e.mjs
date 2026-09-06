@@ -24,6 +24,25 @@ page.on("pageerror", (error) => errors.push(String(error)));
 page.on("console", (message) => { if (message.type() === "error") errors.push(message.text()); });
 await page.goto(url, { waitUntil: "networkidle" });
 await page.waitForFunction(() => navigator.serviceWorker.controller !== null);
+await page.goto(`${origin}/demo/`, { waitUntil: "networkidle" });
+await page.getByText("Demo — sample data, nothing is saved to your real data").waitFor();
+await page.locator("#result-state").getByText("PASS").waitFor();
+await page.evaluate(() => localStorage.setItem("real-data-sentinel", "unchanged"));
+await page.locator("#fixture").fill('{"user":{"email":"demo@example.test"},"request":{"headers":{"authorization":"Bearer demo_sk_A1b2C3d4E5f6"}},"session_material":"k9Qv2Lm8Xz4Rp7Tw3Ny6Bc1D"}');
+await page.locator("#run-contract").click();
+await page.locator("#result-state").getByText("PASS").waitFor();
+const demoKeys = await page.evaluate(() => Object.keys(localStorage));
+if (demoKeys.some((key) => key !== "real-data-sentinel" && !key.startsWith("demo:log-scrub-contract:"))) {
+  throw new Error(`demo wrote outside its storage namespace: ${JSON.stringify(demoKeys)}`);
+}
+await page.locator("#reset-demo").click();
+await page.locator("#result-state").getByText("PASS").waitFor();
+if (await page.evaluate(() => localStorage.getItem("real-data-sentinel")) !== "unchanged") throw new Error("demo reset changed real browser data");
+const notFound = await context.newPage();
+await notFound.goto(`${origin}/404.html`, { waitUntil: "networkidle" });
+await notFound.getByRole("link", { name: "Go to the home page" }).waitFor();
+await notFound.close();
+await page.goto(url, { waitUntil: "networkidle" });
 await page.evaluate(async (value) => {
   const legacy = await caches.open("log-scrub-contract-v1");
   await legacy.put(`/?license=${encodeURIComponent(value)}`, new Response(`legacy entitlement ${value}`));

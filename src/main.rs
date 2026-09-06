@@ -35,6 +35,8 @@ const STARTER_FIXTURE: &str = r#"{
   }
 }
 "#;
+const DEMO_POLICY: &str = include_str!("../examples/demo/log-scrub.json");
+const DEMO_FIXTURE: &str = include_str!("../examples/demo/fixtures/support.json");
 
 #[derive(Parser)]
 #[command(
@@ -56,6 +58,8 @@ enum Command {
     Redact(RedactArgs),
     /// Write a starter log-scrub.json and fixture
     Init(InitArgs),
+    /// Run the bundled support-log sample in an isolated temporary directory
+    Demo(DemoArgs),
 }
 
 #[derive(Args)]
@@ -119,6 +123,13 @@ struct InitArgs {
     force: bool,
 }
 
+#[derive(Args)]
+struct DemoArgs {
+    /// Write the bundled sample and its report here instead of a new temporary directory
+    #[arg(long, value_name = "DIRECTORY")]
+    output: Option<PathBuf>,
+}
+
 #[derive(Serialize)]
 struct CheckReport {
     schema_version: u8,
@@ -162,6 +173,7 @@ fn run() -> Result<i32, String> {
         Command::Check(args) => check(args),
         Command::Redact(args) => redact(args),
         Command::Init(args) => init(args),
+        Command::Demo(args) => demo(args),
     }
 }
 
@@ -374,6 +386,65 @@ fn init(args: InitArgs) -> Result<i32, String> {
         fixture_dir.display()
     );
     Ok(0)
+}
+
+fn demo(args: DemoArgs) -> Result<i32, String> {
+    let directory = match args.output {
+        Some(path) => {
+            if path.exists() {
+                return Err(format!(
+                    "demo output directory already exists: {}; choose a new directory",
+                    path.display()
+                ));
+            }
+            path
+        }
+        None => std::env::temp_dir().join(format!(
+            "log-scrub-demo-{}-{}",
+            std::process::id(),
+            unique_demo_suffix()
+        )),
+    };
+    let fixtures = directory.join("fixtures");
+    fs::create_dir_all(&fixtures).map_err(|error| {
+        format!(
+            "cannot create demo directory {}: {error}",
+            directory.display()
+        )
+    })?;
+    let policy = directory.join("log-scrub.json");
+    let fixture = fixtures.join("support.json");
+    let report = directory.join("scrub-report.md");
+    fs::write(&policy, DEMO_POLICY)
+        .map_err(|error| format!("cannot write demo policy {}: {error}", policy.display()))?;
+    fs::write(&fixture, DEMO_FIXTURE)
+        .map_err(|error| format!("cannot write demo fixture {}: {error}", fixture.display()))?;
+
+    println!("Running the bundled support-log sample…");
+    let code = check(CheckArgs {
+        policy: PolicyArgs {
+            config: policy,
+            token: Vec::new(),
+        },
+        json: false,
+        report: Some(report.clone()),
+        inputs: vec![fixtures],
+    })?;
+    println!(
+        "Demo files and privacy-safe report: {}",
+        directory.display()
+    );
+    println!(
+        "Open {} to inspect the before/after report.",
+        report.display()
+    );
+    Ok(code)
+}
+
+fn unique_demo_suffix() -> u128 {
+    std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map_or(0, |duration| duration.as_nanos())
 }
 
 fn discover_inputs(inputs: &[PathBuf]) -> Result<Vec<PathBuf>, String> {

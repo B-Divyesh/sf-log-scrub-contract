@@ -3,6 +3,15 @@
 All notable changes follow [Keep a Changelog](https://keepachangelog.com/) and
 this project uses semantic versioning.
 
+## [Unreleased]
+
+### Added
+
+- Bundled `log-scrub demo` sample, report, and terminal recording.
+- Isolated `/demo/` browser sandbox, designed 404 page, route metadata, and
+  shared legal-page navigation.
+- Claim registry with clean-state browser and consumer-artifact checks.
+
 ## [0.1.0] - 2026-08-27
 
 ### Added

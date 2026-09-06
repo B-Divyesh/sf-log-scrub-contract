@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f4eedc" />
+    <meta name="description" content="Try a local sample log redaction check without changing your real data." />
+    <title>Demo — Log Scrub Contract</title>
+    <link rel="canonical" href="https://log-scrub-contract.sociobot.in/demo/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Log Scrub Contract" />
+    <meta property="og:title" content="Demo — Log Scrub Contract" />
+    <meta property="og:description" content="Try a local sample log redaction check without changing your real data." />
+    <meta property="og:url" content="https://log-scrub-contract.sociobot.in/demo/" />
+    <meta property="og:image" content="https://log-scrub-contract.sociobot.in/assets/social-card.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Demo — Log Scrub Contract" />
+    <meta name="twitter:description" content="Try a local sample log redaction check without changing your real data." />
+    <meta name="twitter:image" content="https://log-scrub-contract.sociobot.in/assets/social-card.png" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body data-demo-sandbox="true">
+    <a class="skip-link" href="#main">Skip to main content</a>
+    <div class="offline-note" id="offline-note" role="status" hidden>Offline: the sample still runs locally.</div>
+    <header class="site-header">
+      <a class="brand" href="/" aria-label="Log Scrub Contract home"><span class="brand-mark" aria-hidden="true">{■■}</span><span>Log Scrub Contract</span></a>
+      <nav aria-label="Main navigation"><a href="/demo/" aria-current="page">Demo</a><a href="/#install">Install</a><a href="/#team-pack">Team Pack</a><a href="/privacy/">Privacy</a></nav>
+    </header>
+    <main id="main">
+      <section class="demo-hero page-grid" aria-labelledby="demo-title">
+        <div class="demo-intro">
+          <p class="eyebrow">Sample redaction check</p>
+          <h1 id="demo-title">Test the sample support log</h1>
+          <p class="lede">The sample starts with a safe policy and shows the redacted output immediately.</p>
+        </div>
+        <div class="demo-banner"><strong>Demo — sample data, nothing is saved to your real data</strong><div><button class="button quiet" id="reset-demo" type="button">Reset demo</button><a class="button" id="start-for-real" href="/">Start for real</a></div></div>
+      </section>
+      <section class="demo-section page-grid" aria-labelledby="editor-title">
+        <div class="section-note"><h2 id="editor-title">Edit the sample rules</h2><p>Add or remove a path rule, then run the contract again.</p><p>Demo edits use a separate browser-storage area and never read your real data.</p></div>
+        <div class="bench" aria-label="Interactive redaction demo">
+          <div class="field-row"><label for="path-rules">Path rules <span>comma separated</span></label><input id="path-rules" type="text" value="request.headers.authorization, user.email, session_material" spellcheck="false" /></div>
+          <div class="specimen-grid">
+            <div class="editor-wrap"><label for="fixture">Before — sample fixture</label><textarea id="fixture" rows="14" spellcheck="false">{
+  "level": "info",
+  "user": { "email": "ada@example.test" },
+  "request": {
+    "path": "/support",
+    "headers": { "authorization": "Bearer demo_sk_A1b2C3d4E5f6" }
+  },
+  "session_material": "k9Qv2Lm8Xz4Rp7Tw3Ny6Bc1D"
+}</textarea></div>
+            <div class="editor-wrap result-wrap"><div class="result-label"><span>After — scrubbed output</span><span id="result-state" class="state waiting">Waiting</span></div><pre id="result" tabindex="0" aria-label="Sanitized result">Loading the sample result.</pre></div>
+          </div>
+          <div class="bench-actions"><button class="button primary" id="run-contract" type="button">Run contract <span aria-hidden="true">⌘↵</span></button><p id="demo-summary" aria-live="polite">Loading the sample result.</p></div>
+          <ul class="findings" id="findings" aria-label="Contract findings"></ul>
+        </div>
+      </section>
+    </main>
+    <footer class="site-footer"><div class="brand"><span class="brand-mark" aria-hidden="true">{■■}</span><span>Log Scrub Contract</span></div><p>Test redaction rules before logs leave your environment.</p><nav aria-label="Legal navigation"><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a><a href="https://github.com/B-Divyesh/sf-log-scrub-contract/blob/main/LICENSE">MIT License <span class="sr-only">(opens GitHub)</span></a></nav><p class="build-id">v0.1.0 · build <span data-build-id>source</span> · Built by Param Factory</p></footer>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

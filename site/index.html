@@ -4,9 +4,21 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#f4eedc" />
-    <meta name="description" content="A local CLI that regression-tests log redaction before logs leave your environment." />
-    <title>Log Scrub Contract — prove logs are safe before they leave</title>
+    <meta name="description" content="Test log redaction locally before a drain, support bundle, or CI artifact leaves your environment." />
+    <title>Log Scrub Contract — test log redaction</title>
+    <link rel="canonical" href="https://log-scrub-contract.sociobot.in/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Log Scrub Contract" />
+    <meta property="og:title" content="Log Scrub Contract — test log redaction" />
+    <meta property="og:description" content="Test log redaction locally before logs leave your environment." />
+    <meta property="og:url" content="https://log-scrub-contract.sociobot.in/" />
+    <meta property="og:image" content="https://log-scrub-contract.sociobot.in/assets/social-card.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Log Scrub Contract — test log redaction" />
+    <meta name="twitter:description" content="Test log redaction locally before logs leave your environment." />
+    <meta name="twitter:image" content="https://log-scrub-contract.sociobot.in/assets/social-card.png" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
     <link rel="preload" as="image" href="/assets/hero-lab-720.webp" media="(max-width: 720px)" />
     <link rel="preload" as="image" href="/assets/hero-lab.webp" media="(min-width: 721px)" />
     <link rel="stylesheet" href="/src/style.css" />
@@ -22,32 +34,44 @@
         <span>Log Scrub Contract</span>
       </a>
       <nav aria-label="Main navigation">
-        <a href="#demo">Try it</a>
+        <a href="/demo/">Demo</a>
         <a href="#install">Install</a>
         <a href="#team-pack">Team Pack</a>
-        <a href="https://github.com/B-Divyesh/sf-log-scrub-contract">Source</a>
+        <a href="/privacy/">Privacy</a>
       </nav>
     </header>
 
     <main id="main">
       <section class="hero page-grid" aria-labelledby="hero-title">
         <div class="hero-copy">
-          <p class="eyebrow"><span aria-hidden="true">№ 01</span> Local redaction proof</p>
-          <h1 id="hero-title">Know the log is clean <em>before</em> it leaves.</h1>
-          <p class="lede">Turn representative JSON, JSONL, and text logs into a regression contract. Scrub known fields, catch secret-shaped leftovers, and fail CI at the boundary.</p>
+          <p class="eyebrow">Local CLI for log drains</p>
+          <h1 id="hero-title">Test log redaction before sharing logs</h1>
+          <p class="lede">For developers who forward structured logs and need proof that configured secrets are removed.</p>
           <div class="actions">
-            <a class="button primary" href="#install">Install the CLI <span aria-hidden="true">↓</span></a>
-            <a class="text-link" href="#demo">Try a fixture in this tab</a>
+            <a class="button primary" href="/demo/">Try it with sample data <span aria-hidden="true">→</span></a>
+            <span class="action-note">Loads a safe support log in the demo.</span>
           </div>
-          <p class="privacy-stamp"><span aria-hidden="true">✓</span> No upload. No telemetry. No reversible masks.</p>
+          <ul class="plain-facts" aria-label="Product facts"><li>Runs on your machine.</li><li>Does not upload log fixtures.</li><li>Free CLI. Team Pack: $29 once.</li></ul>
         </div>
         <figure class="hero-figure">
           <picture>
             <source media="(max-width: 720px)" srcset="/assets/hero-lab-720.webp" />
             <img src="/assets/hero-lab.webp" width="1200" height="800" alt="An overhead lab notebook with structured log marks, opaque black redaction bars, and hand-drawn verification ticks." fetchpriority="high" />
           </picture>
-          <figcaption><span aria-hidden="true">↳</span> Evidence, not a vendor promise.</figcaption>
+          <figcaption>Opaque redactions and a checked report.</figcaption>
         </figure>
+      </section>
+
+      <section class="recording page-grid" aria-labelledby="recording-title">
+        <div class="section-note">
+          <h2 id="recording-title">Run the bundled sample</h2>
+          <p>The same sample ships with the CLI and the website demo.</p>
+        </div>
+        <div class="terminal-recording">
+          <img src="/assets/cli-demo.svg" width="960" height="430" alt="Terminal recording of log-scrub demo passing a support-log sample with two redactions and no possible leaks." />
+          <p class="terminal-caption">The command creates an isolated temporary folder and prints its report location.</p>
+          <pre class="terminal-transcript" tabindex="0" aria-label="Terminal recording transcript"><code>$ log-scrub demo&#10;PASS fixtures/support.json — 2 redactions, 0 violations&#10;Contract passed: 1 file, 2 redactions, 0 violations&#10;Demo files and privacy-safe report: /tmp/log-scrub-demo-…</code></pre>
+        </div>
       </section>
 
       <section class="signal-strip" aria-label="What the contract checks">
@@ -59,10 +83,10 @@
 
       <section class="demo-section page-grid" id="demo" aria-labelledby="demo-title">
         <div class="section-note">
-          <p class="eyebrow">Live bench test</p>
-          <h2 id="demo-title">Introduce a leak. Watch the contract object.</h2>
-          <p>This reduced browser specimen mirrors path, email, token-shape, and entropy checks. It runs entirely in this tab. Add <code>session_material</code> to the path rules to make the supplied fixture pass.</p>
-          <p class="annotation"><span aria-hidden="true">→</span> The Rust CLI adds JSONL, runtime tokens, safe configurable regex, reports, and CI exit codes.</p>
+          <p class="eyebrow">Browser preview</p>
+          <h2 id="demo-title">Preview a log redaction check</h2>
+          <p>This browser sample checks paths, emails, token shapes, and entropy. It runs entirely in this tab. Add <code>session_material</code> to make the sample pass.</p>
+          <p class="annotation">The CLI adds JSONL, runtime tokens, configurable regex, reports, and CI exit codes.</p>
         </div>
         <div class="bench" aria-label="Interactive redaction demo">
           <div class="field-row">
@@ -71,7 +95,7 @@
           </div>
           <div class="specimen-grid">
             <div class="editor-wrap">
-              <label for="fixture">Before — fixture</label>
+              <label for="fixture">Before — sample log</label>
               <textarea id="fixture" rows="14" spellcheck="false">{
   "level": "info",
   "user": { "email": "ada@example.test" },
@@ -84,12 +108,12 @@
             </div>
             <div class="editor-wrap result-wrap">
               <div class="result-label"><span>After — scrubbed</span><span id="result-state" class="state waiting">Waiting</span></div>
-              <pre id="result" tabindex="0" aria-label="Sanitized result">Run the contract to inspect this specimen.</pre>
+              <pre id="result" tabindex="0" aria-label="Sanitized result">Run the contract to inspect this sample.</pre>
             </div>
           </div>
           <div class="bench-actions">
             <button class="button primary" id="run-contract" type="button">Run contract <span aria-hidden="true">⌘↵</span></button>
-            <button class="button quiet" id="reset-demo" type="button">Reset specimen</button>
+            <button class="button quiet" id="reset-demo" type="button">Reset sample</button>
             <p id="demo-summary" aria-live="polite">Nothing has been evaluated yet.</p>
           </div>
           <ul class="findings" id="findings" aria-label="Contract findings"></ul>
@@ -98,8 +122,8 @@
 
       <section class="workflow page-grid" aria-labelledby="workflow-title">
         <div class="section-note">
-          <p class="eyebrow">The boundary test</p>
-          <h2 id="workflow-title">A small contract at every exit.</h2>
+          <p class="eyebrow">Steps</p>
+          <h2 id="workflow-title">How it works</h2>
         </div>
         <ol class="steps">
           <li><span class="step-number">1</span><div><h3>Capture representative fixtures</h3><p>Use fake, realistically shaped examples for every production drain and support export.</p></div></li>
@@ -110,8 +134,8 @@
 
       <section class="install page-grid" id="install" aria-labelledby="install-title">
         <div class="section-note">
-          <p class="eyebrow">Five-minute setup</p>
-          <h2 id="install-title">One binary. One policy. Exit means something.</h2>
+          <p class="eyebrow">Install</p>
+          <h2 id="install-title">Install the CLI</h2>
           <p>Exit 0 is a passing contract, 1 is a possible leak, and 2 is an invalid invocation, policy, or fixture.</p>
         </div>
         <div class="code-notebook">
@@ -133,9 +157,9 @@
       <section class="team-pack page-grid" id="team-pack" aria-labelledby="pack-title">
         <div class="pack-card">
           <div>
-            <p class="eyebrow">Optional field notes</p>
+            <p class="eyebrow">Optional templates</p>
             <h2 id="pack-title">Team Pack <span class="price">$29 once</span></h2>
-            <p>Keep the complete CLI free. Unlock convenience templates for GitHub Actions, common cloud headers, support bundles, and multi-drain review checklists.</p>
+            <p>Keep the complete CLI free. The Team Pack adds templates for shared policy work.</p>
             <ul class="check-list">
               <li>12 annotated policy presets</li>
               <li>CI matrices for multiple drains</li>
@@ -170,14 +194,15 @@
 
       <section class="caveat page-grid" aria-labelledby="caveat-title">
         <div class="redaction-mark" aria-hidden="true"></div>
-        <div><h2 id="caveat-title">Proof of your rules, not a compliance certificate.</h2><p>Entropy is a useful alarm, not a verdict. Test every real egress path, review allow patterns, rotate any credential that ever appeared in an uncontrolled log, and keep runtime redaction in place.</p></div>
+        <div><h2 id="caveat-title">What this tool does not do</h2><p>It does not collect logs, scan your repository, replace runtime redaction, or certify compliance.</p></div>
       </section>
     </main>
 
     <footer class="site-footer">
       <div class="brand"><span class="brand-mark" aria-hidden="true">{■■}</span><span>Log Scrub Contract</span></div>
-      <p>Local-first security tooling from the Param Factory.</p>
+      <p>Test redaction rules before logs leave your environment.</p>
       <nav aria-label="Legal navigation"><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a><a href="https://github.com/B-Divyesh/sf-log-scrub-contract/blob/main/LICENSE">MIT License</a></nav>
+      <p class="build-id">v0.1.0 · build <span data-build-id>source</span> · Built by Param Factory</p>
     </footer>
     <script type="module" src="/src/main.ts"></script>
   </body>

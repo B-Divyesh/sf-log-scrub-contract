@@ -3,8 +3,8 @@
  * written to Cache Storage. The checkout token belongs only in localStorage,
  * after the application has removed it from the visible URL.
  */
-const CACHE = "log-scrub-contract-v2";
-const SHELL = ["/", "/privacy/", "/terms/", "/favicon.svg", "/assets/hero-lab-720.webp", "/assets/hero-lab.webp"];
+const CACHE = "log-scrub-contract-v3";
+const SHELL = ["/", "/demo/", "/privacy/", "/terms/", "/404.html", "/favicon.svg", "/assets/hero-lab-720.webp", "/assets/hero-lab.webp"];
 const LICENSE_PARAMS = ["license", "license_token", "entitlement"];
 
 function isSensitiveUrl(url) {
@@ -50,7 +50,8 @@ self.addEventListener("fetch", (event) => {
   // Navigation, checkout return, and entitlement verification are deliberately
   // network-only. A failed safe navigation can use only the known-safe shell.
   if (event.request.mode === "navigate" || isSensitiveUrl(url)) {
-    event.respondWith(fetch(event.request).catch(() => caches.match("/")));
+    const fallback = url.pathname.startsWith("/demo") ? "/demo/" : "/";
+    event.respondWith(fetch(event.request).catch(() => caches.match(fallback)));
     return;
   }
 

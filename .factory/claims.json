@@ -1,0 +1,128 @@
+[
+  {
+    "id": "regression-contract",
+    "claim": "Checks bundled log fixtures against a redaction contract.",
+    "where": "Landing recording, README",
+    "test": "npm test -- --grep @claim:regression-contract",
+    "sandbox": "Fresh temporary directory; run the shipped CLI demo and inspect its report."
+  },
+  {
+    "id": "local-no-upload",
+    "claim": "The browser demo does not upload its log fixture.",
+    "where": "Landing facts, Privacy",
+    "test": "npm test -- --grep @claim:local-no-upload",
+    "sandbox": "Fresh demo browser context; edit and run a fixture while recording every request."
+  },
+  {
+    "id": "no-telemetry",
+    "claim": "The browser demo has no telemetry requests.",
+    "where": "Privacy",
+    "test": "npm test -- --grep @claim:no-telemetry",
+    "sandbox": "Fresh demo browser context; record requests from first load through idle."
+  },
+  {
+    "id": "irreversible-markers",
+    "claim": "Matches become opaque redaction markers instead of partial masks.",
+    "where": "Landing, README",
+    "test": "npm test -- --grep @claim:irreversible-markers",
+    "sandbox": "Run the release CLI against the bundled support fixture and inspect output."
+  },
+  {
+    "id": "path-rules",
+    "claim": "Path rules redact selected JSON values and reveal an unconfigured leftover.",
+    "where": "Landing preview, README",
+    "test": "npm test -- --grep @claim:path-rules",
+    "sandbox": "Fresh direct demo; remove and restore the session path rule."
+  },
+  {
+    "id": "safe-regex",
+    "claim": "Regular-expression checks avoid catastrophic backtracking.",
+    "where": "Landing, README",
+    "test": "npm test -- --grep @claim:safe-regex",
+    "sandbox": "Release CLI processes a known nested-quantifier worst case under two seconds."
+  },
+  {
+    "id": "runtime-tokens",
+    "claim": "Runtime tokens can be supplied without putting their value in policy configuration.",
+    "where": "Landing, README",
+    "test": "npm test -- --grep @claim:runtime-tokens",
+    "sandbox": "Fresh policy and fixture; pass a token with --token and inspect redacted output."
+  },
+  {
+    "id": "entropy",
+    "claim": "Entropy checks withhold output when a secret-shaped value remains.",
+    "where": "Landing, README",
+    "test": "npm test -- --grep @claim:entropy",
+    "sandbox": "Fresh policy and fixture; assert exit 1 and output_withheld without the value."
+  },
+  {
+    "id": "browser-tab",
+    "claim": "The direct demo uses sample data in a separate browser-storage namespace.",
+    "where": "/demo",
+    "test": "npm test -- --grep @claim:browser-tab",
+    "sandbox": "Fresh /demo context; run a populated sample and inspect local storage keys."
+  },
+  {
+    "id": "jsonl",
+    "claim": "Checks JSONL fixtures record by record.",
+    "where": "README",
+    "test": "npm test -- --grep @claim:jsonl",
+    "sandbox": "Fresh JSONL fixture built from the bundled sample; inspect machine report totals."
+  },
+  {
+    "id": "private-reports",
+    "claim": "Reports show markers and descriptions without raw matched values.",
+    "where": "Landing recording, README",
+    "test": "npm test -- --grep @claim:private-reports",
+    "sandbox": "Fresh CLI demo; inspect the generated Markdown report."
+  },
+  {
+    "id": "ci-exit-codes",
+    "claim": "Exit code 0 passes, 1 reports a possible leak, and 2 reports invalid input.",
+    "where": "Landing, README",
+    "test": "npm test -- --grep @claim:ci-exit-codes",
+    "sandbox": "Fresh release CLI inputs for passing, leaking, and missing-policy paths."
+  },
+  {
+    "id": "offline-demo",
+    "claim": "The direct demo works offline after its first visit.",
+    "where": "Demo offline notice, README",
+    "test": "npm test -- --grep @claim:offline-demo",
+    "sandbox": "Fresh browser context; load /demo, wait for its worker, go offline, and reload."
+  },
+  {
+    "id": "license-cache",
+    "claim": "License return URLs and verification responses are not stored in Cache Storage.",
+    "where": "Privacy, README",
+    "test": "npm test -- --grep @claim:license-cache",
+    "sandbox": "Fresh browser context with a mocked verification response; scan all Cache Storage entries."
+  },
+  {
+    "id": "free-cli",
+    "claim": "The free CLI runs the complete redaction check without a license.",
+    "where": "Landing, Terms",
+    "test": "npm test -- --grep @claim:free-cli",
+    "sandbox": "Package, extract, install, and run the public binary in a clean consumer directory."
+  },
+  {
+    "id": "team-pack-price",
+    "claim": "The Team Pack is a $29 one-time template purchase with the listed contents.",
+    "where": "Landing, Terms",
+    "test": "npm test -- --grep @claim:team-pack-price",
+    "sandbox": "Fresh browser context entered through /demo, then the landing purchase section."
+  },
+  {
+    "id": "license-lock",
+    "claim": "An invalid license keeps Team Pack templates locked.",
+    "where": "Landing, Terms",
+    "test": "npm test -- --grep @claim:license-lock",
+    "sandbox": "Fresh browser context with a mocked invalid verification response."
+  },
+  {
+    "id": "templates-private",
+    "claim": "Team Pack templates do not contain browser sample data or the license token.",
+    "where": "Landing",
+    "test": "npm test -- --grep @claim:templates-private",
+    "sandbox": "Fresh browser context with a mocked valid license and captured copy actions."
+  }
+]
